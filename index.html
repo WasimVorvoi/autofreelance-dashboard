@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AutoFreelance</title><meta name="robots" content="noindex">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--good:#16a34a;--warn:#d97706;--bad:#dc2626}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1020;--card:#121a2e;--ink:#e2e8f0;--muted:#94a3b8;--line:#1e293b;--accent:#60a5fa}}
+:root{--s1:#2a78d6;--s2:#eb6834;--grid:#e1e0d9;--axis:#c3c2b7;--axl:#898781;--ink2:#52514e;--surf:#fcfcfb}
+@media (prefers-color-scheme:dark){:root{--s1:#3987e5;--s2:#d95926;--grid:#2c2c2a;--axis:#383835;--axl:#898781;--ink2:#c3c2b7;--surf:#121a2e}}
+*{box-sizing:border-box;margin:0;padding:0}
+.chart{width:100%;min-height:60px}.chart svg{display:block;overflow:visible}
+.s1{fill:var(--s1)}.s2{fill:var(--s2)}.ln1{stroke:var(--s1)}.ln2{stroke:var(--s2)}
+.gl{stroke:var(--grid);stroke-width:1}.bl{stroke:var(--axis);stroke-width:1}.ref{stroke:var(--axl);stroke-width:1.5;stroke-dasharray:4 4}
+.axl{fill:var(--axl);font-size:12px}.lab{fill:var(--ink2);font-size:12px}.val{fill:var(--ink);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
+.spark{margin-top:6px;height:26px}.spark path{fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin-bottom:8px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.18);z-index:50;max-width:280px}
+.cap{color:var(--muted);font-size:12px;margin-top:6px}
+.multi{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 20px}
+.mc h3{font-size:12px;font-weight:600;color:var(--ink2);display:flex;justify-content:space-between;margin-bottom:2px}.mc h3 b{color:var(--ink);font-variant-numeric:tabular-nums}
+.area{fill:var(--s1);opacity:.12}
+.meter{position:relative;height:8px;width:120px;background:var(--line);border-radius:99px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.meter i{position:absolute;inset:0 auto 0 0;background:var(--s1);border-radius:99px}.meter.full i{background:var(--axl)}
+.st-ok{color:var(--good)}.st-wait{color:var(--muted)}
+.run{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.run .meter{width:100%;margin:4px 0 0}.dot-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:6px;animation:pulse 1.5s infinite}
+@keyframes pulse{50%{opacity:.25}}.tk{color:var(--good);font-weight:600}.rj{color:var(--muted)}.lg1{background:var(--s1)}.lg2{background:var(--s2)}
+body{font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:24px 16px}
+.wrap{max-width:1200px;margin:0 auto;display:grid;gap:16px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+h1{font-size:22px;letter-spacing:-.01em}.sub{color:var(--muted);font-size:13px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em}.kpi .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.kpi.deal .v{color:var(--good)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:10px}
+.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 2px}.bar i{display:block;height:100%;background:var(--accent)}
+.bar.warn i{background:var(--warn)}.bar.bad i{background:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:12px}.scroll{overflow:auto;max-height:420px}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;background:var(--line)}
+.pill.demo-ready{background:#dbeafe;color:#1e40af}.pill.pitched,.pill.followed-up{background:#fef3c7;color:#92400e}
+.pill.won,.pill.won-pending-payment{background:#dcfce7;color:#166534}.pill.dnc{background:#fee2e2;color:#991b1b}
+pre{font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;color:var(--muted)}
+a{color:var(--accent);text-decoration:none}
+.row{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px dashed var(--line)}
+.alert{background:#dcfce7;color:#166534;border-color:#86efac}
+</style></head><body><div class="wrap">
+<header><h1>AutoFreelance</h1><span class="sub" id="ts">loadingâ€¦</span></header>
+<div id="alerts"></div>
+<div class="kpis" id="kpis"></div>
+<div class="card"><h2>Progress over time</h2><div class="multi" id="c-multi"></div>
+<p class="cap">One chart per category, each on its own scale, all on the same time axis. Steps show when a number changed. Early points are rebuilt from the git history, which covers everything except "Businesses scanned".</p></div>
+<div class="card"><h2>Live hunter activity</h2><p class="cap" id="live-sub" style="margin:-4px 0 10px"></p>
+<div class="grid2" style="gap:16px"><div><div class="sub" style="margin-bottom:6px">Runs (last 24h)</div><div class="scroll" style="max-height:340px" id="live-runs"></div></div>
+<div><div class="sub" style="margin-bottom:6px">Every business checked, newest first</div><div class="scroll" style="max-height:340px"><table id="live-feed"></table></div></div></div></div>
+<div class="card"><h2>Cloud hunters</h2><p class="cap" style="margin:-4px 0 10px">8 regional agents running hourly in the cloud, even with the laptop off. Each pauses when its region already has 150 leads waiting.</p><div class="scroll"><table id="hunters"></table></div></div>
+<div class="card"><h2>Pipeline funnel</h2><div class="chart" id="c-funnel"></div><p class="cap">Log scale: each step is a far smaller number than the one above, so bar length shows orders of magnitude. The % is the share that made it from the step above.</p></div>
+<div class="grid2">
+  <div class="card"><h2>Pitches sent per day</h2><div class="chart" id="c-days"></div></div>
+  <div class="card"><h2>Leads by status</h2><div class="chart" id="c-status"></div></div>
+</div>
+<div class="grid2">
+  <div class="card"><h2>World harvest: top countries</h2><div class="legend"><span><i class="lg1"></i>No website</span><span><i class="lg2"></i>Has website</span></div><div class="chart" id="c-world"></div></div>
+  <div class="card"><h2>Claude usage over time</h2><div class="legend"><span><i class="lg1"></i>5-hour window</span><span><i class="lg2"></i>Weekly</span></div><div class="chart" id="c-usage"></div><p class="cap">Dashed line: 75% brake, where hunters pause.</p></div>
+</div>
+<div class="grid2">
+  <div class="card"><h2>Claude usage</h2><div id="usage"></div></div>
+  <div class="card"><h2>Automation</h2><div id="task"></div></div>
+</div>
+<div class="grid2">
+  <div class="card"><h2>Lead pipeline</h2><div id="status"></div></div>
+  <div class="card"><h2>Businesses scanned</h2><div id="scanned"></div></div>
+</div>
+<div class="card"><h2>Leads</h2><div class="scroll"><table id="leads"></table></div></div>
+<div class="grid2">
+  <div class="card"><h2>World harvest (businesses with email, by country)</h2><div class="scroll" id="world"></div></div>
+  <div class="card"><h2>Lead pools (contactable, not yet used)</h2><div id="pools"></div></div>
+</div>
+<div class="grid2">
+  <div class="card"><h2>Activity log</h2><pre id="activity"></pre></div>
+  <div class="card"><h2>Latest laptop run</h2><pre id="runlog"></pre></div>
+</div>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const $=id=>document.getElementById(id), n=v=>(v??0).toLocaleString();
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const when=t=>t?new Date(typeof t==='number'?t*1000:t).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'}):'â€”';
+function bar(p){p=p??0;const c=p>=85?'bad':p>=70?'warn':'';return `<div class="bar ${c}"><i style="width:${Math.min(p,100)}%"></i></div>`}
+async function load(){
+ let s; try{s=await (await fetch('stats.json?'+Date.now())).json()}catch(e){$('ts').textContent='dashboard server not reachable';return}
+ $('ts').textContent='updated '+new Date(s.now).toLocaleTimeString()+' Â· public snapshot, rebuilt hourly · page refreshes every 30s';
+ const k=s.kpi;
+ $('kpis').innerHTML=[['Businesses scanned',k.scanned,'','scanned'],['Contactable in pools',k.contactable_pool,'','contactable_pool'],['Active leads',k.leads,'','leads'],['Demo sites live',k.demos_live,'','demos_live'],['Pitched today',k.pitched_today+' / 20','','pitched_today'],['Pitched total',k.pitched_total,'','pitched_total'],['Replies',k.replies,'','replies'],['Deals',k.deals,'deal','deals']]
+  .map(([l,v,c,key])=>`<div class="card kpi ${c||''}"><div class="l">${l}</div><div class="v">${typeof v==='number'?n(v):v}</div><svg class="spark" data-key="${key}" width="100%" height="26"></svg></div>`).join('');
+ LAST=s; drawCharts(s);
+ $('alerts').innerHTML=s.alerts.length?`<div class="card alert"><h2 style="color:inherit">Needs you</h2><pre style="color:inherit">${esc(s.alerts.join('\n'))}</pre></div>`:'';
+ const u=s.usage;
+ $('usage').innerHTML=u?`<div>5-hour window: <b>${u.five_hour}%</b> <span class="sub">resets ${when(u.five_hour_resets)}</span></div>${bar(u.five_hour)}
+  <div style="margin-top:10px">Weekly: <b>${u.seven_day}%</b> <span class="sub">resets ${when(u.seven_day_resets)}</span></div>${bar(u.seven_day)}
+  <div class="sub" style="margin-top:8px">Usage brake: ${u.brake?'<b style="color:var(--bad)">ON â€” hunters paused</b>':'off'} Â· data from ${when(u.saved_at)}</div>`:'<span class="sub">no usage data yet</span>';
+ const t=s.task;
+ $('task').innerHTML=(t?`<div class="row"><span>Laptop task â€” last run</span><b>${t.last_result==='267011'?'â€”':when(t.last_run)}</b></div><div class="row"><span>Next run</span><b>${when(t.next_run)}</b></div><div class="row"><span>Last result</span><b>${t.last_result==='0'?'OK':t.last_result==='267011'?'not run yet':t.last_result==='267009'?'running now':esc(t.last_result)}</b></div>`:'<span class="sub">task info unavailable</span>')
+  +`<div class="row"><span>Cloud inbox routine</span><b>hourly 7amâ€“11pm ET</b></div>`;
+ $('status').innerHTML=Object.entries(s.lead_status).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="row"><span class="pill ${k}">${esc(k)}</span><b>${v}</b></div>`).join('');
+ $('scanned').innerHTML=Object.entries(s.scanned).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><b>${n(v)}</b></div>`).join('')+`<div class="row"><span><b>Total</b></span><b>${n(k.scanned)}</b></div>`;
+ $('leads').innerHTML='<tr><th>Business</th><th>Where</th><th>Status</th><th>Demo</th><th>Pitched</th></tr>'+s.leads.map(r=>
+  `<tr><td>${esc(r.business)}</td><td>${esc([r.city,r.region].filter(Boolean).join(', '))}</td><td><span class="pill ${r.status}">${esc(r.status)}</span></td><td>${r.demo_url?`<a href="${esc(r.demo_url)}" target="_blank">open</a>`:''}</td><td>${r.pitched_at?when(r.pitched_at):''}</td></tr>`).join('');
+ $('world').innerHTML=(s.world.length?'<table><tr><th>Country</th><th>Businesses</th></tr>'+s.world.map(w=>`<tr><td>${esc(w.cc)} ${esc(w.country)}</td><td>${n(w.count)}</td></tr>`).join('')+'</table>':'<span class="sub">runningâ€¦</span>')+(s.world_total?`<p class="sub" style="margin-top:8px">${esc(s.world_total)}</p>`:'');
+ $('pools').innerHTML=Object.entries(s.pools).map(([k,p])=>`<div class="row"><span>${esc(k)}</span><span><b>${n(p.status.unused||0)}</b> unused of ${n(p.total)}${p.no_website?` Â· ${n(p.no_website)} no-website`:''}</span></div>`).join('');
+ $('activity').textContent=s.activity.join('\n')||'â€”'; $('runlog').textContent=s.run_log.join('\n')||'no laptop runs yet';
+}
+
+let LAST=null, HISTORY=[];
+const NS='http://www.w3.org/2000/svg';
+function el(tag,a,p){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e}
+function txt(p,x,y,t,cls,anchor){const e=el('text',{x,y,class:cls,'text-anchor':anchor||'start'},p);e.textContent=t;return e}
+function rr(x,y,w,h,r,dir){r=Math.max(0,Math.min(r,dir==='up'?w/2:h/2,dir==='up'?h:w));
+ if(dir==='up')return `M${x},${y+h}v${-(h-r)}a${r},${r} 0 0 1 ${r},${-r}h${w-2*r}a${r},${r} 0 0 1 ${r},${r}v${h-r}z`;
+ return `M${x},${y}h${w-r}a${r},${r} 0 0 1 ${r},${r}v${h-2*r}a${r},${r} 0 0 1 ${-r},${r}h${-(w-r)}z`}
+const tipEl=document.getElementById('tip');
+document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');
+ if(!t){tipEl.style.opacity=0;return} tipEl.innerHTML=t.dataset.tip; tipEl.style.opacity=1;
+ tipEl.style.left=Math.min(e.clientX+14,innerWidth-tipEl.offsetWidth-8)+'px'; tipEl.style.top=Math.min(e.clientY+14,innerHeight-tipEl.offsetHeight-8)+'px'});
+const pct=(a,b)=>b>0?(a/b*100<1?(a/b*100).toFixed(2):(a/b*100).toFixed(1))+'%':'â€”';
+
+function hbars(box,rows,o){box.innerHTML='';const W=box.clientWidth||500,lab=o.lab||150,rh=28,g=6,H=rows.length*(rh+g);
+ const svg=el('svg',{width:W,height:H,role:'img','aria-label':o.title},box);const pw=Math.max(40,W-lab-(o.valW||110));
+ const max=Math.max(1,...rows.map(r=>r.total??r.v));const sc=v=>v<=0?0:o.log?pw*Math.log10(v+1)/Math.log10(max+1):pw*v/max;
+ rows.forEach((r,i)=>{const y=i*(rh+g);txt(svg,lab-10,y+rh/2+4,r.label,'lab','end');
+  let x=lab;const segs=r.segs||[{v:r.v,cls:'s1'}];
+  if(r.segs&&o.log){const tw=sc(r.total);segs.forEach(sg=>{const w=r.total?tw*sg.v/r.total:0;if(w>0.5){el('path',{d:rr(x,y+4,Math.max(w-2,0.5),rh-8,4),class:sg.cls},svg);x+=w}})}
+  else segs.forEach((sg,j)=>{const w=sc(sg.v);if(w>0.5){el('path',{d:rr(x,y+4,Math.max(w-(j<segs.length-1?2:0),0.5),rh-8,4),class:sg.cls},svg);x+=w}});
+  txt(svg,x+8,y+rh/2+4,r.text,'val');el('rect',{x:0,y,width:W,height:rh,fill:'transparent','data-tip':r.tip},svg)});
+ el('line',{x1:lab,x2:lab,y1:0,y2:H-g,class:'bl'},svg)}
+
+function columns(box,days,cap){box.innerHTML='';const W=box.clientWidth||500,H=200,L=30,B=24,T=10,pw=W-L-8,ph=H-B-T;
+ const svg=el('svg',{width:W,height:H,role:'img','aria-label':'Pitches sent per day'},box);
+ const max=Math.max(cap,...days.map(d=>d.n));const y=v=>T+ph-ph*v/max;
+ [0,cap/2,cap].forEach(v=>{el('line',{x1:L,x2:W-8,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,v,'axl','end')});
+ const bw=pw/days.length;days.forEach((d,i)=>{const x=L+i*bw,h=ph*d.n/max;
+  if(h>0)el('path',{d:rr(x+bw*0.2,y(d.n),bw*0.6,h,4,'up'),class:'s1'},svg);
+  if((days.length-1-i)%2===0){const dd=new Date(d.day+'T12:00');txt(svg,x+bw/2,H-6,i===days.length-1?'Today':dd.toLocaleDateString([], {month:'short',day:'numeric'}),'axl','middle')}
+  if(d.n)txt(svg,x+bw/2,y(d.n)-5,d.n,'val','middle');
+  el('rect',{x,y:T,width:bw,height:ph,fill:'transparent','data-tip':`<b>${new Date(d.day+'T12:00').toLocaleDateString([], {weekday:'short',month:'short',day:'numeric'})}</b><br>${d.n} pitch${d.n===1?'':'es'} sent (cap ${cap})`},svg)});
+ el('line',{x1:L,x2:W-8,y1:y(cap),y2:y(cap),class:'ref'},svg);txt(svg,W-10,y(cap)-5,'daily cap','axl','end');
+ el('line',{x1:L,x2:W-8,y1:y(0),y2:y(0),class:'bl'},svg)}
+
+function lines(box,hist){box.innerHTML='';const pts=hist.filter(h=>h.five_hour!=null);
+ if(pts.length<2){box.innerHTML='<p class="sub">Collecting data: a point is saved every 10 minutes, so the line appears after about 20 minutes.</p>';return}
+ const W=box.clientWidth||500,H=200,L=36,B=24,T=10,R=48,pw=W-L-R,ph=H-B-T;const svg=el('svg',{width:W,height:H,role:'img','aria-label':'Claude usage over time'},box);
+ const t0=+new Date(pts[0].t),t1=+new Date(pts[pts.length-1].t);const x=t=>L+pw*((+new Date(t))-t0)/Math.max(1,t1-t0),y=v=>T+ph-ph*v/100;
+ [0,25,50,75,100].forEach(v=>{el('line',{x1:L,x2:L+pw,y1:y(v),y2:y(v),class:'gl'},svg);txt(svg,L-6,y(v)+4,v+'%','axl','end')});
+ el('line',{x1:L,x2:L+pw,y1:y(75),y2:y(75),class:'ref'},svg);
+ [0,.5,1].forEach(f=>{const t=new Date(t0+(t1-t0)*f);txt(svg,L+pw*f,H-6,t.toLocaleTimeString([], {weekday:'short',hour:'numeric'}),'axl',f===0?'start':f===1?'end':'middle')});
+ [['five_hour','ln1','s1','5h'],['seven_day','ln2','s2','wk']].forEach(([k,lc,dc,lb])=>{
+  el('path',{d:pts.map((p,i)=>(i?'L':'M')+x(p.t)+','+y(p[k]??0)).join(''),fill:'none',class:lc,'stroke-width':2,'stroke-linejoin':'round','stroke-linecap':'round'},svg);
+  const last=pts[pts.length-1];el('circle',{cx:x(last.t),cy:y(last[k]??0),r:4,class:dc,stroke:'var(--card)','stroke-width':2},svg);
+  txt(svg,x(last.t)+8,y(last[k]??0)+4,(last[k]??0)+'%','val')});
+ const cross=el('line',{x1:0,x2:0,y1:T,y2:T+ph,class:'bl',opacity:0},svg);
+ const hit=el('rect',{x:L,y:T,width:pw,height:ph,fill:'transparent'},svg);
+ hit.addEventListener('mousemove',e=>{const bx=svg.getBoundingClientRect(),mx=e.clientX-bx.left;let best=pts[0];
+  for(const p of pts)if(Math.abs(x(p.t)-mx)<Math.abs(x(best.t)-mx))best=p;cross.setAttribute('x1',x(best.t));cross.setAttribute('x2',x(best.t));cross.setAttribute('opacity',1);
+  hit.dataset.tip=`<b>${new Date(best.t).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'})}</b><br>5-hour: ${best.five_hour}%<br>Weekly: ${best.seven_day}%`});
+ hit.addEventListener('mouseleave',()=>cross.setAttribute('opacity',0))}
+
+function sparks(hist){document.querySelectorAll('svg.spark').forEach(sv=>{sv.innerHTML='';const k=sv.dataset.key,vals=hist.map(h=>h[k]).filter(v=>typeof v==='number');
+ if(vals.length<2)return;const W=sv.clientWidth||100,H=26,mn=Math.min(...vals),mx=Math.max(...vals),sp=mx-mn||1;
+ const d=vals.map((v,i)=>(i?'L':'M')+(2+(W-4)*i/(vals.length-1))+','+(H-3-(H-6)*(v-mn)/sp)).join('');el('path',{d},sv);
+ sv.setAttribute('data-tip',`Trend over the last ${Math.round((+new Date(hist[hist.length-1].t)-+new Date(hist[0].t))/36e5)||'<1'}h: ${n(vals[0])} â†’ ${n(vals[vals.length-1])}`)})}
+
+
+const MSERIES=[['scanned','Businesses scanned'],['contactable_pool','Contactable in pools'],['leads','Researched leads'],['demos_live','Demo sites live'],['pitched_total','Pitched (total)'],['pitched_today','Pitched today'],['replies','Replies'],['deals','Deals']];
+function nice(v){if(v<=4)return 4;const p=Math.pow(10,Math.floor(Math.log10(v))),f=v/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+const short=v=>v>=1e6?(v/1e6).toFixed(v>=1e7?0:1)+'M':v>=1e3?(v/1e3).toFixed(v>=1e4?0:1)+'k':String(v);
+function multiples(box,hist,cur){box.innerHTML='';if(!hist.length){box.innerHTML='<p class="sub">No history yet.</p>';return}
+ const ts=hist.map(h=>+new Date(h.t)),t0=Math.min(...ts),t1=Math.max(Date.now(),...ts);
+ // Create every card first so the grid settles before any chart measures its width.
+ const cards=MSERIES.map(([k,label])=>{const c=document.createElement('div');c.className='mc';c.innerHTML=`<h3><span>${label}</span><b>${n(cur[k]??0)}</b></h3>`;box.appendChild(c);return c});
+ MSERIES.forEach(([k,label],i)=>{const pts=hist.filter(h=>typeof h[k]==='number').map(h=>({t:+new Date(h.t),v:h[k]}));
+  if(typeof cur[k]==='number')pts.push({t:Date.now(),v:cur[k]});
+  const card=cards[i];
+  const W=card.clientWidth||280,H=120,L=38,R=8,T=8,B=20,pw=W-L-R,ph=H-T-B;
+  const svg=el('svg',{width:W,height:H,role:'img','aria-label':label+' over time'},card);
+  const ymax=nice(Math.max(1,...pts.map(p=>p.v)));const x=t=>L+pw*(t-t0)/Math.max(1,t1-t0),y=v=>T+ph-ph*v/ymax;
+  [0,ymax/2,ymax].forEach(v=>{el('line',{x1:L,x2:L+pw,y1:y(v),y2:y(v),class:v?'gl':'bl'},svg);txt(svg,L-6,y(v)+4,short(v),'axl','end')});
+  [[t0,'start'],[t1,'end']].forEach(([t,a])=>txt(svg,x(t),H-4,new Date(t).toLocaleString([], {weekday:'short',hour:'numeric'}),'axl',a));
+  if(!pts.length){txt(svg,L+pw/2,T+ph/2,'collectingâ€¦','axl','middle');return}
+  let d='M'+x(pts[0].t)+','+y(pts[0].v);for(let i=1;i<pts.length;i++)d+='H'+x(pts[i].t)+'V'+y(pts[i].v);
+  el('path',{d:d+'V'+y(0)+'H'+x(pts[0].t)+'Z',class:'area'},svg);
+  el('path',{d,fill:'none',class:'ln1','stroke-width':2,'stroke-linejoin':'round'},svg);
+  const last=pts[pts.length-1];el('circle',{cx:x(last.t),cy:y(last.v),r:4,class:'s1',stroke:'var(--card)','stroke-width':2},svg);
+  const cross=el('line',{x1:0,x2:0,y1:T,y2:T+ph,class:'bl',opacity:0},svg);
+  const hit=el('rect',{x:L,y:0,width:pw,height:H,fill:'transparent'},svg);
+  hit.addEventListener('mousemove',e=>{const mx=e.clientX-svg.getBoundingClientRect().left;const tm=t0+(t1-t0)*Math.max(0,Math.min(1,(mx-L)/pw));
+   let p=pts[0];for(const q of pts)if(q.t<=tm)p=q;cross.setAttribute('x1',x(tm));cross.setAttribute('x2',x(tm));cross.setAttribute('opacity',1);
+   hit.dataset.tip=`<b>${label}</b><br>${n(p.v)}<br><span style="opacity:.7">${new Date(tm).toLocaleString([], {weekday:'short',hour:'numeric',minute:'2-digit'})}</span>`});
+  hit.addEventListener('mouseleave',()=>cross.setAttribute('opacity',0))})}
+
+function hunterTable(hs){const ago=t=>{if(!t)return'never';const m=Math.round((Date.now()-new Date(t))/60000);if(isNaN(m))return'â€”';return m<1?'just now':m<60?m+' min ago':Math.round(m/60)+' h ago'};
+ const clip=x=>x.length>48?x.slice(0,46)+'â€¦':x;
+ const label=r=>r.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+ $('hunters').innerHTML='<tr><th>Region</th><th>Countries</th><th>Schedule</th><th>Last run</th><th>Last result</th><th>Leads today</th><th>Leads total</th><th>Queue (cap 150)</th></tr>'+hs.map(h=>{
+  const full=h.queue>=h.cap,pc=Math.min(100,h.queue/h.cap*100);
+  const res=!h.last_msg?'<span class="st-wait">waiting for first run</span>':/skipped|full|NONE|no unused/i.test(h.last_msg)?`<span class="st-wait" data-tip="${esc(h.last_msg)}">${esc(clip(h.last_msg))}</span>`:/taken=0\b/.test(h.last_msg)?`<span class="st-wait" data-tip="${esc(h.last_msg)}">${esc(clip(h.last_msg))}</span>`:`<span class="st-ok" data-tip="${esc(h.last_msg)}">${esc(clip(h.last_msg))}</span>`;
+  return `<tr data-tip="<b>${esc(label(h.region))}</b><br>${esc(h.countries.join(', '))}<br>${h.runs} runs logged Â· ${h.taken_total} leads found"><td><b>${esc(label(h.region))}</b></td><td>${esc(h.countries.slice(0,6).join(' '))}${h.countries.length>6?' +'+(h.countries.length-6):''}</td><td>hourly :${String(h.minute).padStart(2,'0')}</td><td>${ago(h.last_t)}</td><td>${res}</td><td>${h.taken_today}</td><td>${h.taken_total}</td>
+  <td><span class="meter ${full?'full':''}"><i style="width:${pc}%"></i></span>${h.queue}${full?' Â· paused':''}</td></tr>`}).join('')}
+
+function liveHunters(L){if(!L)return;const label=r=>r.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+ const ago=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return m<1?'just now':m<60?m+' min ago':Math.round(m/60)+' h ago'};
+ const running=L.runs.filter(r=>r.state==='running').length;
+ $('live-sub').innerHTML=`${running?`<span class="dot-live"></span><b>${running} running now</b> · `:''}Hunters push progress every 5 businesses; the dashboard checks GitHub every minute (last check ${ago(L.fetched)}).`;
+ $('live-runs').innerHTML=L.runs.length?L.runs.map(r=>`<div class="run" data-tip="<b>${esc(r.name)}</b><br>started ${ago(r.start)}<br>${r.taken} taken · ${r.rejected} rejected">
+  <div>${r.state==='running'?'<span class="dot-live"></span>':''}<b>${esc(label(r.region))}</b> <span class="sub">${esc(r.state)} · ${ago(r.start)}</span></div><div><span class="tk">${r.taken} taken</span> · <span class="rj">${r.rejected} rejected</span></div>
+  <div style="grid-column:1/-1"><span class="meter ${r.state==='finished'?'full':''}"><i style="width:${Math.min(100,r.done/Math.max(1,r.rows)*100)}%"></i></span><span class="sub">${r.done}/${r.rows} businesses checked</span></div></div>`).join(''):'<p class="sub">No hunter activity yet. It appears after the next cloud run that uses live logging.</p>';
+ $('live-feed').innerHTML=L.feed.length?'<tr><th>When</th><th>Business</th><th>Where</th><th>Result</th></tr>'+L.feed.map(e=>`<tr data-tip="${esc(e.reason||'')}"><td>${ago(e.t)}</td><td>${esc(e.business)}</td><td>${esc([e.city,e.country].filter(Boolean).join(', '))}</td><td>${e.result==='taken'?'<span class="tk">✓ taken</span>':'<span class="rj">✗ '+esc((e.reason||'rejected').slice(0,40))+'</span>'}</td></tr>`).join(''):'<tr><td class="sub">Waiting for the first logged business…</td></tr>'}
+async function drawCharts(s){
+ try{HISTORY=await (await fetch('history.json?'+Date.now())).json()}catch(e){}
+ const k=s.kpi,st=[['Businesses scanned',k.scanned],['Contactable',k.contactable_pool],['Researched leads',k.leads],['Demo sites live',k.demos_live],['Pitched',k.pitched_total],['Replies',k.replies],['Deals',k.deals]];
+ hbars($('c-funnel'),st.map(([l,v],i)=>({label:l,v,text:n(v)+(i?'  Â·  '+pct(v,st[i-1][1]):''),tip:`<b>${l}</b><br>${n(v)}${i?`<br>${pct(v,st[i-1][1])} of ${st[i-1][0].toLowerCase()}`:''}`})),{log:true,lab:150,valW:150,title:'Pipeline funnel'});
+ columns($('c-days'),s.pitch_days,20);
+ const ss=Object.entries(s.lead_status).sort((a,b)=>b[1]-a[1]);
+ hbars($('c-status'),ss.map(([l,v])=>({label:l,v,text:n(v),tip:`<b>${esc(l)}</b><br>${n(v)} lead${v===1?'':'s'}`})),{lab:130,valW:50,title:'Leads by status'});
+ const NAMES={MX:'Mexico',AR:'Argentina',BR:'Brazil',CO:'Colombia',EC:'Ecuador',CL:'Chile',PE:'Peru',BO:'Bolivia',UY:'Uruguay',PY:'Paraguay',GT:'Guatemala',CR:'Costa Rica',PA:'Panama',US:'United States',CA:'Canada',AU:'Australia',NZ:'New Zealand',IN:'India',PH:'Philippines',ID:'Indonesia',KE:'Kenya',NG:'Nigeria',JM:'Jamaica',TT:'Trinidad & Tobago',DO:'Dominican Rep.',SV:'El Salvador',HN:'Honduras',NI:'Nicaragua',BZ:'Belize',MY:'Malaysia',TH:'Thailand',VN:'Vietnam'};
+ hbars($('c-world'),(s.world_split||[]).map(w=>{const t=w.no+w.yes,nm=NAMES[w.cc]||w.cc;return{label:nm,total:t,segs:[{v:w.no,cls:'s1'},{v:w.yes,cls:'s2'}],text:n(t),
+  tip:`<b>${esc(nm)}</b><br>${n(t)} contactable businesses<br>No website: ${n(w.no)} (${pct(w.no,t)})<br>Has website: ${n(w.yes)}`}}),{lab:120,valW:60,title:'World harvest by country'});
+ if(s.hunters)hunterTable(s.hunters);liveHunters(s.hunter_live);
+ lines($('c-usage'),HISTORY);sparks(HISTORY);multiples($('c-multi'),HISTORY,s.kpi)}
+load(); setInterval(load,30000);
+let RZ;addEventListener('resize',()=>{clearTimeout(RZ);RZ=setTimeout(()=>LAST&&drawCharts(LAST),150)});
+</script></body></html>
